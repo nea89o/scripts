@@ -1,0 +1,21 @@
+Scripts that I tend to use on mostly in desktop environments.
+
+Im planning to expand this, but right now a lot of my scripts are very application specific and/or dependency heavy.
+
+A multimedia capable terminal emulator such as wezterm is probably required for a lot of these things.
+
+jq is a dependency for some of these scripts.
+
+
+Application scripts:
+
+reddit: a script to show a top image post from reddit
+generate-multimc-desktop-files: a perhaps very specific script to generate desktop files for all your multimc instances
+
+
+Library scripts:
+
+choose: a library script i use to prompt for user input
+osc: a library script to execute some OSC escape sequences
+readkey: a library script to read a single key and parse key entities
+

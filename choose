@@ -1,0 +1,63 @@
+#!/bin/bash
+
+if [ "a$1" == "a--help" ] || [ "a$1" == "a-h" ]; then
+  cat <<EOF
+Usage: $0 [-i] \`tty\` "Option A" "Option B"
+Displays the user in the provided tty all the options and lets the user select an option with their keys.
+
+Prints the selected option (or the (0-based) index of that option with the -i flag) to the default stdout.
+
+Exits with code 1 if the user aborted the selection with q.
+EOF
+fi
+
+printidx=0
+if [ "a$1" == "a-i" ]; then
+  printidx=1
+  shift
+fi
+
+tty="$1"
+shift
+options=("${@}")
+optionslength=${#options[@]}
+sel=0
+printf "\e[s" >"$tty"
+while true; do
+  printf "\e[u\e[s\e[K" >"$tty"
+  for ((i = 0; i < optionslength; i++)); do
+    if [ "$i" -eq $sel ]; then
+      printf "\e[30;47m" >"$tty"
+    fi
+    printf "%s\e[40;37m " "${options[$i]}" >"$tty"
+  done
+  case "$(./readkey <"$tty")" in
+  left)
+    sel=$((sel - 1))
+    ;;
+  right)
+    sel=$((sel + 1))
+    ;;
+  q)
+    printf "\e[u\e[KSelection aborted\n" >"$tty"
+    exit 1
+    ;;
+  enter)
+    break
+    ;;
+  esac
+  if ((sel < 0)); then
+    sel=0
+  fi
+  if ((sel >= optionslength)); then
+    sel=$((optionslength - 1))
+  fi
+
+done
+printf "\e[u\e[KSelected %s\n" "${options[$sel]}" >"$tty"
+
+if [ "$printidx" -eq 1 ]; then
+  echo "$sel"
+else
+  echo "${options[$sel]}"
+fi

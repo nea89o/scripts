@@ -1,0 +1,28 @@
+#!/bin/bash
+
+## Please do not judge me, i don't even like reddit, it just had the easiest API
+
+API_URL="https://api.reddit.com/best"
+if [[ "$1" = "--help" ]]; then
+  cat >&2 <<-"EOF"
+	Usage: $0 [subreddit]
+
+	Specifying a subreddit is optional, and should be done without r/ prefix
+	EOF
+  exit 1
+elif [[ -n "$1" ]]; then
+  API_URL="https://api.reddit.com/r/$1/best"
+fi
+
+QUAD=$(
+  curl -H "User-Agent: bash:moe.nea89.meme-tui" "$API_URL" 2>/dev/null | jq -r ".data.children[].data | select(.post_hint == \"image\") | .url,.title,.id,.subreddit_name_prefixed" | head -n 4
+  echo x
+)
+QUAD=${QUAD%?}
+{ read -r image && read -r title && read -r id && read -r subreddit; } < <(echo "$QUAD")
+curl -L "$image" 2>/dev/null | ./osc showimg
+echo
+./osc anchor "https://redd.it/$id" "$title"
+printf " "
+./osc anchor "https://reddit.com/$subreddit" "($subreddit)"
+echo

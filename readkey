@@ -1,0 +1,36 @@
+#!/bin/bash
+
+if [ "a$1" == "a-h" ] || [ "a$1" == "a--help" ]; then
+  cat <<EOF
+Usage: $0
+
+Reads a single key from stdin and parses some key codes such as arrow keys and enter.
+EOF
+fi
+read -rsN1 key
+
+read -rsN1 -t 0.0001 k1
+read -rsN1 -t 0.0001 k2
+read -rsN1 -t 0.0001 k3
+key+="${k1}${k2}${k3}"
+
+case "$key" in
+$'\e[A' | $'\e0A')
+  echo up
+  ;;
+$'\e[D' | $'\e0D')
+  echo left
+  ;;
+$'\e[B' | $'\e0B')
+  echo down
+  ;;
+$'\e[C' | $'\e0C')
+  echo right
+  ;;
+$'\n')
+  echo enter
+  ;;
+*)
+  echo "$key"
+  ;;
+esac

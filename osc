@@ -1,0 +1,25 @@
+#!/bin/bash
+esc() {
+  python -c "import sys;print('\x1b]'+';'.join(sys.argv[1:]), end='\x07')" "$@"
+}
+if [ "$1" = "notify" ]; then
+  esc 777 notify "$2" "$3"
+elif [ "$1" = "anchor" ] || [ "$1" = "url" ]; then
+  esc 8 "" "$2"
+  echo -n "$3"
+  esc 8 "" ""
+elif [ "$1" = "showimg" ]; then
+  printf "\e]1337;File=inline=1;preserveAspectRatio=1:"
+  base64 -w 0
+  printf "\a"
+else
+  cat >&2 <<EOF
+Usage: $0 <action> [args]
+
+Actions:
+
+notify [notification title] [notification text] - Show system notification
+anchor [url] [text] - Show hyperlink
+showimg - Show an image from STDIN (NOT base64-encoded)
+EOF
+fi

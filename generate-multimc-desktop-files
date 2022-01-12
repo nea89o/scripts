@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo "Deleting old .desktop files"
+rm ~/.local/share/applications/multimc-*.desktop
+
+echo "Seeking instances"
+for instdir in ~/.local/share/multimc/instances/*; do
+  if [[ (-d "$instdir") && (-f "$instdir/instance.cfg") ]]; then
+    echo "Scanning $instdir"
+    instanceid="$(basename -- "$instdir")"
+    name="$instanceid"
+    while IFS="=" read -r key value; do
+      case "$key" in
+      name)
+        echo "Instance Name: $value"
+        name="$value"
+        ;;
+      esac
+    done <"$instdir/instance.cfg"
+    cat <<EOF > "$HOME/.local/share/applications/multimc-$instanceid.desktop"
+[Desktop Entry]
+Name=MultiMC: $name
+Type=Application
+Categories=Game
+StartupWMClass=multic
+Terminal=false
+Comment=Open MultiMC Instancew
+GenericName=Minecraft
+Exec=$(which multimc) -l "$instanceid"
+EOF
+  fi
+done
