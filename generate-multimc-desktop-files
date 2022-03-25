@@ -4,10 +4,26 @@ echo "Deleting old .desktop files"
 rm ~/.local/share/applications/multimc-*.desktop
 
 echo "Seeking instances"
-for instdir in ~/.local/share/multimc/instances/*; do
-  if [[ (-d "$instdir") && (-f "$instdir/instance.cfg") ]]; then
-    echo "Scanning $instdir"
-    instanceid="$(basename -- "$instdir")"
+
+
+create_desktop_file() {
+    cat <<EOF > "$HOME/.local/share/applications/multimc-$2-$3.desktop"
+[Desktop Entry]
+Name=MultiMC: $1
+Type=Application
+Categories=Game
+StartupWMClass=multimc
+Terminal=false
+Comment=Open MultiMC Instance
+GenericName=Minecraft
+Exec=$(which "$2") -l "$3"
+EOF
+}
+
+check_instance() {
+  if [[ (-d "$1") && (-f "$1/instance.cfg") ]]; then
+    echo "Scanning $1"
+    instanceid="$(basename -- "$1")"
     name="$instanceid"
     while IFS="=" read -r key value; do
       case "$key" in
@@ -16,17 +32,14 @@ for instdir in ~/.local/share/multimc/instances/*; do
         name="$value"
         ;;
       esac
-    done <"$instdir/instance.cfg"
-    cat <<EOF > "$HOME/.local/share/applications/multimc-$instanceid.desktop"
-[Desktop Entry]
-Name=MultiMC: $name
-Type=Application
-Categories=Game
-StartupWMClass=multic
-Terminal=false
-Comment=Open MultiMC Instancew
-GenericName=Minecraft
-Exec=$(which multimc) -l "$instanceid"
-EOF
+    done <"$1/instance.cfg"
+    create_desktop_file "$name" "$2" "$instanceid"
   fi
+}
+
+for instdir in ~/.local/share/multimc/instances/*; do
+    check_instance "$instdir" multimc
+done
+for instdir in ~/.local/share/PolyMC/instances/*; do
+    check_instance "$instdir" polymc
 done
